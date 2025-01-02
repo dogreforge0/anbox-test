@@ -23,6 +23,9 @@ blocks:
             - echo "Downloading and installing Firefox"
             - wget -q -O /tmp/firefox.tar.bz2 "https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US"
             - sudo tar -xjf /tmp/firefox.tar.bz2 -C /opt/
+
+            # Remove existing symbolic link if it exists, then create a new one
+            - sudo rm -f /usr/bin/firefox
             - sudo ln -s /opt/firefox/firefox /usr/bin/firefox
 
             # Install Puppeteer
