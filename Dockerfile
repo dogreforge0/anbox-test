@@ -4,7 +4,7 @@ FROM ubuntu:20.04
 # Set environment variables to prevent interactive prompts during build
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install necessary dependencies
+# Install necessary dependencies and libraries
 RUN apt-get update && apt-get install -y \
     curl \
     lxc \
@@ -24,12 +24,18 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     python3-venv \
+    fonts-liberation \
+    libgbm1 \
+    libgtk-3-0 \
+    libxkbcommon0 \
+    xdg-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Anbox using official Ubuntu package repositories
+# Install Google Chrome and fix dependencies
 RUN curl -sSL https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o google-chrome.deb && \
     dpkg -i google-chrome.deb && \
-    apt-get install -f -y
+    apt-get install -f -y && \
+    rm google-chrome.deb
 
 # Install Anbox dependencies and Anbox itself
 RUN apt-get update && apt-get install -y \
