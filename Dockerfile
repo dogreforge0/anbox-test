@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y \
     libgtk-3-0 \
     libxkbcommon0 \
     xdg-utils \
+    software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
 # Add the Anbox PPA repository to install anbox-modules-dkms
