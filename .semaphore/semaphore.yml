@@ -27,22 +27,22 @@ blocks:
             # Save the JavaScript to a file
             - echo 'const puppeteer = require("puppeteer");' > create_gmail.js
             - echo 'async function createAccount() {' >> create_gmail.js
-            - echo '    const browser = await puppeteer.launch({' >> create_gmail.js
-            - echo '        headless: false,' >> create_gmail.js
-            - echo '        executablePath: "/usr/bin/firefox"' >> create_gmail.js
-            - echo '    });' >> create_gmail.js
-            - echo '    const page = await browser.newPage();' >> create_gmail.js
-            - echo '    await page.goto("https://accounts.google.com/signup");' >> create_gmail.js
-            - echo '    await page.waitForSelector("input[name=\'firstName\']");' >> create_gmail.js
-            - echo '    await page.type("input[name=\'firstName\']", "John");' >> create_gmail.js
-            - echo '    await page.type("input[name=\'lastName\']", "Doe");' >> create_gmail.js
-            - echo '    await page.type("input[name=\'Username\']", "john.doe" + Math.floor(Math.random() * 10000));' >> create_gmail.js
-            - echo '    await page.type("input[name=\'Passwd\']", "Password123!");' >> create_gmail.js
-            - echo '    await page.type("input[name=\'ConfirmPasswd\']", "Password123!");' >> create_gmail.js
-            - echo '    await page.click("#accountDetailsNext");' >> create_gmail.js
-            - echo '    await page.waitForNavigation();' >> create_gmail.js
-            - echo '    await page.screenshot({ path: "/tmp/gmail_account_creation.png" });' >> create_gmail.js
-            - echo '    await browser.close();' >> create_gmail.js
+            - echo '  const browser = await puppeteer.launch({' >> create_gmail.js
+            - echo '    headless: false,' >> create_gmail.js
+            - echo '    executablePath: "/usr/bin/firefox"' >> create_gmail.js
+            - echo '  });' >> create_gmail.js
+            - echo '  const page = await browser.newPage();' >> create_gmail.js
+            - echo '  await page.goto("https://accounts.google.com/signup");' >> create_gmail.js
+            - echo '  await page.waitForSelector("input[name=\'firstName\']");' >> create_gmail.js
+            - echo '  await page.type("input[name=\'firstName\']", "John");' >> create_gmail.js
+            - echo '  await page.type("input[name=\'lastName\']", "Doe");' >> create_gmail.js
+            - echo '  await page.type("input[name=\'Username\']", "john.doe" + Math.floor(Math.random() * 10000));' >> create_gmail.js
+            - echo '  await page.type("input[name=\'Passwd\']", "Password123!");' >> create_gmail.js
+            - echo '  await page.type("input[name=\'ConfirmPasswd\']", "Password123!");' >> create_gmail.js
+            - echo '  await page.click("#accountDetailsNext");' >> create_gmail.js
+            - echo '  await page.waitForNavigation();' >> create_gmail.js
+            - echo '  await page.screenshot({ path: "/tmp/gmail_account_creation.png" });' >> create_gmail.js
+            - echo '  await browser.close();' >> create_gmail.js
             - echo '}' >> create_gmail.js
             - echo '' >> create_gmail.js
             - echo 'createAccount();' >> create_gmail.js
