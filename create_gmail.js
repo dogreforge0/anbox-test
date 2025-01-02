@@ -3,7 +3,7 @@ const puppeteer = require('puppeteer');
 async function createAccount() {
     const browser = await puppeteer.launch({
         headless: false,
-        executablePath: '/usr/bin/firefox'  // Ensure this path is correct for Firefox
+        executablePath: '/opt/firefox/firefox'  // Ensure this path is correct for Firefox
     });
 
     const page = await browser.newPage();
