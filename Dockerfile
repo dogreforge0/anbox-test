@@ -31,14 +31,12 @@ RUN apt-get update && apt-get install -y \
     xdg-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Google Chrome and fix dependencies
-RUN curl -sSL https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o google-chrome.deb && \
-    dpkg -i google-chrome.deb && \
-    apt-get install -f -y && \
-    rm google-chrome.deb
+# Add the Anbox PPA repository to install anbox-modules-dkms
+RUN add-apt-repository ppa:morphis/anbox-support && \
+    apt-get update
 
-# Install Anbox dependencies and Anbox itself
-RUN apt-get update && apt-get install -y \
+# Install Anbox modules and required libraries
+RUN apt-get install -y \
     anbox-modules-dkms \
     libglu1-mesa \
     libegl1-mesa \
