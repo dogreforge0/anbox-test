@@ -6,7 +6,7 @@ blocks:
   - name: Capture Anbox Screenshot
     task:
       jobs:
-        - name: Capture Screenshot
+        - name: Capture Screenshot 
           commands:
             - checkout
             - echo "Installing Docker and required dependencies"
