@@ -1,0 +1,61 @@
+version: v1.0
+
+name: Anbox Screenshot Capture Pipeline
+
+blocks:
+  - name: Capture Anbox Screenshot
+    task:
+      jobs:
+        - name: Capture Screenshot
+          commands:
+            - checkout
+            - echo "Installing Docker and required dependencies"
+            - sudo apt-get update
+            - sudo apt-get install -y docker.io x11vnc imagemagick
+
+            # Build Docker image for Anbox (assuming a Dockerfile exists)
+            - echo "Building Docker image"
+            - |
+              docker build -t anbox-container .
+
+            # Run Docker container with Anbox
+            - echo "Running Anbox container"
+            - |
+              docker run -d --name anbox --privileged \
+                --volume /dev:/dev \
+                --device /dev/ashmem --device /dev/binder --device /dev/graphics/fb0 \
+                anbox-container
+
+            # Verify that the Anbox container is running
+            - echo "Verifying Anbox container is running"
+            - docker ps
+
+            # Install Anbox and dependencies inside the container
+            - echo "Installing Anbox and dependencies in container"
+            - docker exec -u root anbox-container bash -c "apt-get update && apt-get install -y anbox x11vnc imagemagick"
+
+            # Start Anbox session
+            - echo "Starting Anbox session"
+            - docker exec anbox-container bash -c "anbox session-manager &"
+
+            # Wait for Anbox to load
+            - echo "Waiting for Anbox to load"
+            - sleep 20  # Adjust depending on Anbox loading time
+
+            # Start X11VNC server to capture the screen
+            - echo "Starting X11VNC server"
+            - docker exec anbox-container bash -c "x11vnc -display :0 -forever -nopw -listen localhost &"
+
+            # Capture screenshot using ImageMagick (import command)
+            - echo "Capturing screenshot"
+            - docker exec anbox-container bash -c "import -window root /tmp/screenshot.png"
+
+            # Copy the screenshot from the container to the host
+            - docker cp anbox-container:/tmp/screenshot.png ./screenshot.png
+
+            # Move screenshot to the /tmp directory
+            - echo "Moving screenshot to /tmp directory"
+            - mv ./screenshot.png /tmp/screenshot.png
+
+            # Push the screenshot artifact as per the pattern
+            - artifact push job /tmp/screenshot.png
