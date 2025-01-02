@@ -17,7 +17,13 @@ blocks:
             - echo "Updating package lists"
             - sudo apt-get update
             - echo "Installing required dependencies"
-            - sudo apt-get install -y curl wget unzip firefox-esr
+            - sudo apt-get install -y curl wget unzip
+
+            # Manually install Firefox
+            - echo "Downloading and installing Firefox"
+            - wget -q -O /tmp/firefox.tar.bz2 "https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US"
+            - sudo tar -xjf /tmp/firefox.tar.bz2 -C /opt/
+            - sudo ln -s /opt/firefox/firefox /usr/bin/firefox
 
             # Install Puppeteer
             - echo "Installing Puppeteer"
@@ -32,7 +38,7 @@ blocks:
               async function createAccount() {
                   const browser = await puppeteer.launch({
                       headless: false,
-                      executablePath: '/usr/bin/firefox-esr'  # Ensure this path is correct for Firefox
+                      executablePath: '/usr/bin/firefox'  # Ensure this path is correct for Firefox
                   });
 
                   const page = await browser.newPage();
