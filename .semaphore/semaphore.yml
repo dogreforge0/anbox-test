@@ -17,7 +17,7 @@ blocks:
             - echo "Updating package lists"
             - sudo apt-get update
             - echo "Installing required dependencies"
-            - sudo apt-get install -y curl wget unzip chromium-browser
+            - sudo apt-get install -y curl wget unzip firefox-esr
 
             # Install Puppeteer
             - echo "Installing Puppeteer"
@@ -32,7 +32,7 @@ blocks:
               async function createAccount() {
                   const browser = await puppeteer.launch({
                       headless: false,
-                      executablePath: '/usr/bin/chromium-browser'  # Ensure this path is correct for Chromium
+                      executablePath: '/usr/bin/firefox-esr'  # Ensure this path is correct for Firefox
                   });
 
                   const page = await browser.newPage();
