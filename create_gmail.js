@@ -2,13 +2,13 @@ const puppeteer = require('puppeteer');
 
 async function createAccount() {
     const browser = await puppeteer.launch({
-        headless: false,  // Set to true if you want it to run in headless mode
-        executablePath: '/usr/bin/chromium-browser'  // Path to the Chromium browser
+        headless: false,
+        executablePath: '/usr/bin/firefox'  // Ensure this path is correct for Firefox
     });
 
     const page = await browser.newPage();
     await page.goto('https://accounts.google.com/signup');
-    
+
     // Wait for the first name input field and type in the details
     await page.waitForSelector('input[name="firstName"]');
     await page.type('input[name="firstName"]', 'John');
