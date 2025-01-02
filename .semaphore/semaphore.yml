@@ -4,8 +4,8 @@ name: Gmail Account Creation in Blisk
 
 agent:
   machine:
-    type: e1-standard-2  # Adjust the machine type based on your needs
-    os_image: ubuntu2004  # This can be changed if needed
+    type: e1-standard-2
+    os_image: ubuntu2004
 
 blocks:
   - name: Create Gmail Account in Blisk
@@ -13,29 +13,31 @@ blocks:
       jobs:
         - name: Run Blisk and Automate Gmail Signup
           commands:
-            # Checkout the code
             - checkout
 
-            # Install necessary dependencies
-            - echo "Installing dependencies"
+            # Install the latest Node.js version (>=18)
+            - echo "Installing Node.js 18"
+            - curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+            - sudo apt-get install -y nodejs
+
+            # Install dependencies
             - sudo apt-get update
             - sudo apt-get install -y curl wget unzip xvfb libgtk-3-0 libgbm1 libx11-6 libxcomposite1 libxdamage1 libxrandr2 libasound2 libvulkan1
 
-            # Download and Install Blisk (version will vary)
+            # Download and Install Blisk
             - echo "Installing Blisk Browser"
             - curl -sSL https://blisk.io/download/latest -o blisk.deb
             - sudo dpkg -i blisk.deb || sudo apt-get install -f -y
 
-            # Install Node.js and NPM for Selenium or Puppeteer automation
-            - echo "Installing Node.js and Puppeteer for automation"
-            - sudo apt-get install -y nodejs npm
-            - sudo npm install puppeteer
+            # Install Puppeteer
+            - echo "Installing Puppeteer"
+            - npm install puppeteer
 
-            # Run Xvfb (virtual display) to simulate a screen for Blisk
+            # Run Xvfb (virtual display)
             - echo "Starting Xvfb for headless display"
             - Xvfb :99 -screen 0 1280x1024x24 & export DISPLAY=:99
 
-            # Run Puppeteer to automate Gmail account creation in Blisk
+            # Create Gmail account with Puppeteer
             - echo "Automating Gmail account creation"
             - |
               cat <<EOF > create_gmail.js
@@ -43,32 +45,22 @@ blocks:
               async function createAccount() {
                   const browser = await puppeteer.launch({headless: false, executablePath: '/usr/bin/blisk'});
                   const page = await browser.newPage();
-
-                  // Go to Gmail account creation page
                   await page.goto('https://accounts.google.com/signup');
                   await page.waitForSelector('input[name="firstName"]');
-
-                  // Fill the form with random details (you can modify this)
                   await page.type('input[name="firstName"]', 'John');
                   await page.type('input[name="lastName"]', 'Doe');
                   await page.type('input[name="Username"]', 'john.doe' + Math.floor(Math.random() * 10000));
                   await page.type('input[name="Passwd"]', 'Password123!');
                   await page.type('input[name="ConfirmPasswd"]', 'Password123!');
                   await page.click('#accountDetailsNext');
-
-                  // Wait for the next page (could add more steps for phone verification, etc.)
                   await page.waitForNavigation();
-
-                  // Screenshot of the completed page
                   await page.screenshot({ path: '/tmp/gmail_account_creation.png' });
-
                   await browser.close();
               }
 
               createAccount();
               EOF
 
-            # Run the Puppeteer script
             - node create_gmail.js
 
             # Push the screenshot artifact
