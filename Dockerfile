@@ -34,6 +34,9 @@ RUN apt-get update && apt-get install -y \
 # Enable the Snap package manager
 RUN systemctl enable snapd
 
+# Start Snapd daemon
+RUN systemctl start snapd
+
 # Install Anbox using snap
 RUN snap install --classic anbox
 
