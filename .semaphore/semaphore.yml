@@ -2,11 +2,16 @@ version: v1.0
 
 name: Anbox Screenshot Capture Pipeline
 
+agent:
+  machine:
+    type: e1-standard-2  # Adjust this based on the machine type you need
+    os_image: ubuntu2004  # You can change this to any other image if needed
+
 blocks:
   - name: Capture Anbox Screenshot
     task:
       jobs:
-        - name: Capture Screenshot 
+        - name: Capture Screenshot
           commands:
             - checkout
             - echo "Installing Docker and required dependencies"
