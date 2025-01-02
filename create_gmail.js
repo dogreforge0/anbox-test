@@ -1,36 +1,34 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 
-async function createAccount() {
-    const browser = await puppeteer.launch({
-        headless: false,
-        executablePath: '/opt/firefox/firefox'  // Ensure this path is correct for Firefox
-    });
-
-    const page = await browser.newPage();
-    await page.goto('https://accounts.google.com/signup');
-
-    // Wait for the first name input field and type in the details
-    await page.waitForSelector('input[name="firstName"]');
-    await page.type('input[name="firstName"]', 'John');
-    await page.type('input[name="lastName"]', 'Doe');
-
-    // Generate a random username
-    await page.type('input[name="Username"]', 'john.doe' + Math.floor(Math.random() * 10000));
-
-    // Set the password and confirm password
-    await page.type('input[name="Passwd"]', 'Password123!');
-    await page.type('input[name="ConfirmPasswd"]', 'Password123!');
-
-    // Click Next button to proceed with the sign-up
-    await page.click('#accountDetailsNext');
-    await page.waitForNavigation();
-
-    // Take a screenshot after the page has loaded
-    await page.screenshot({ path: '/tmp/gmail_account_creation.png' });
-
-    // Close the browser after the task is completed
-    await browser.close();
+// Custom delay function using Promise and setTimeout
+function delay(time) {
+    return new Promise(resolve => setTimeout(resolve, time));
 }
 
-// Start the account creation process
-createAccount();
+async function captureScreenshot() {
+    try {
+        const browser = await puppeteer.launch({
+            headless: true,  // Headless mode (no UI)
+            executablePath: '/usr/bin/firefox',  // Make sure Firefox is installed and available at this path
+            timeout: 60000,  // Timeout for browser launch
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],  // Arguments to avoid sandbox issues
+        });
+
+        const page = await browser.newPage();
+        await page.goto('https://accounts.google.com/signup');
+        
+        // Wait for 4 seconds to ensure the page has fully loaded
+        await delay(4000);  // Use the custom delay function
+
+        // Take a screenshot
+        await page.screenshot({ path: '/tmp/gmail_account_creation.png' });
+        
+        console.log("Screenshot saved at /tmp/gmail_account_creation.png");
+
+        await browser.close();
+    } catch (error) {
+        console.error('Error during screenshot capture:', error);
+    }
+}
+
+captureScreenshot();
