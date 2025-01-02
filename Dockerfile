@@ -26,9 +26,13 @@ RUN apt-get update && apt-get install -y \
     python3-venv \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Anbox dependencies
-RUN curl -sSL https://github.com/anbox/anbox/releases/download/v0.1/anbox-ubuntu-20.04-2021-09-22.tar.xz | tar -xJ -C / && \
-    apt-get update && apt-get install -y \
+# Install Anbox using official Ubuntu package repositories
+RUN curl -sSL https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o google-chrome.deb && \
+    dpkg -i google-chrome.deb && \
+    apt-get install -f -y
+
+# Install Anbox dependencies and Anbox itself
+RUN apt-get update && apt-get install -y \
     anbox-modules-dkms \
     libglu1-mesa \
     libegl1-mesa \
