@@ -1,70 +1,58 @@
 version: v1.0
 
-name: Gmail Account Creation in Blisk
+name: Gmail Account Creation Automation
 
 agent:
   machine:
-    type: e1-standard-2
-    os_image: ubuntu2004
+    type: e1-standard-2  # Adjust this based on the machine type you need
+    os_image: ubuntu2004  # You can change this to any other image if needed
 
 blocks:
-  - name: Create Gmail Account in Blisk
+  - name: Create Gmail Account
     task:
       jobs:
-        - name: Run Blisk and Automate Gmail Signup
+        - name: Automate Gmail Account Creation
           commands:
             - checkout
-
-            # Install the latest Node.js version (>=18)
-            - echo "Installing Node.js 18"
-            - curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-            - sudo apt-get install -y nodejs
-
-            # Install dependencies
+            - echo "Updating package lists"
             - sudo apt-get update
-            - sudo apt-get install -y curl wget unzip xvfb libgtk-3-0 libgbm1 libx11-6 libxcomposite1 libxdamage1 libxrandr2 libasound2 libvulkan1
-
-            # Download and Install Blisk
-            - echo "Installing Blisk Browser"
-            - curl -sSL https://blisk.io/download/latest -o blisk.deb
-            - sudo dpkg -i blisk.deb || sudo apt-get install -f -y
+            - echo "Installing required dependencies"
+            - sudo apt-get install -y curl wget unzip chromium-browser
 
             # Install Puppeteer
             - echo "Installing Puppeteer"
-            - npm install puppeteer
+            - PUPPETEER_SKIP_DOWNLOAD=true npm install puppeteer
 
-            # Run Xvfb (virtual display)
-            - echo "Starting Xvfb for headless display"
-            - Xvfb :99 -screen 0 1280x1024x24 & export DISPLAY=:99
+            # Create JavaScript file for Gmail account creation
+            - echo "Creating Gmail account creation script"
+            - cat <<EOF > create_gmail.js
+const puppeteer = require('puppeteer');
+async function createAccount() {
+    const browser = await puppeteer.launch({
+        headless: false,
+        executablePath: '/usr/bin/chromium-browser'  # Ensure this path is correct for Chromium
+    });
+    const page = await browser.newPage();
+    await page.goto('https://accounts.google.com/signup');
+    await page.waitForSelector('input[name="firstName"]');
+    await page.type('input[name="firstName"]', 'John');
+    await page.type('input[name="lastName"]', 'Doe');
+    await page.type('input[name="Username"]', 'john.doe' + Math.floor(Math.random() * 10000));
+    await page.type('input[name="Passwd"]', 'Password123!');
+    await page.type('input[name="ConfirmPasswd"]', 'Password123!');
+    await page.click('#accountDetailsNext');
+    await page.waitForNavigation();
+    await page.screenshot({ path: '/tmp/gmail_account_creation.png' });
+    await browser.close();
+}
 
-            # Create Gmail account with Puppeteer
-            - echo "Automating Gmail account creation"
-            - |
-              cat <<EOF > create_gmail.js
-              const puppeteer = require('puppeteer');
-              async function createAccount() {
-                  const browser = await puppeteer.launch({headless: false, executablePath: '/usr/bin/blisk'});
-                  const page = await browser.newPage();
-                  await page.goto('https://accounts.google.com/signup');
-                  await page.waitForSelector('input[name="firstName"]');
-                  await page.type('input[name="firstName"]', 'John');
-                  await page.type('input[name="lastName"]', 'Doe');
-                  await page.type('input[name="Username"]', 'john.doe' + Math.floor(Math.random() * 10000));
-                  await page.type('input[name="Passwd"]', 'Password123!');
-                  await page.type('input[name="ConfirmPasswd"]', 'Password123!');
-                  await page.click('#accountDetailsNext');
-                  await page.waitForNavigation();
-                  await page.screenshot({ path: '/tmp/gmail_account_creation.png' });
-                  await browser.close();
-              }
+createAccount();
+EOF
 
-              createAccount();
-              EOF
-
+            # Run the JavaScript file to automate Gmail account creation
+            - echo "Running Gmail account creation script"
             - node create_gmail.js
 
-            # Push the screenshot artifact
+            # Capture and save the screenshot (if needed for artifacts)
+            - echo "Screenshot saved as /tmp/gmail_account_creation.png"
             - artifact push job /tmp/gmail_account_creation.png
-
-            # Cleanup
-            - rm create_gmail.js
