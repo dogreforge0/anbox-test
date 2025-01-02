@@ -1,66 +1,78 @@
 version: v1.0
 
-name: Anbox Screenshot Capture Pipeline
+name: Gmail Account Creation in Blisk
 
 agent:
   machine:
-    type: e1-standard-2  # Adjust this based on the machine type you need
-    os_image: ubuntu2004  # You can change this to any other image if needed
+    type: e1-standard-2  # Adjust the machine type based on your needs
+    os_image: ubuntu2004  # This can be changed if needed
 
 blocks:
-  - name: Capture Anbox Screenshot
+  - name: Create Gmail Account in Blisk
     task:
       jobs:
-        - name: Capture Screenshot
+        - name: Run Blisk and Automate Gmail Signup
           commands:
+            # Checkout the code
             - checkout
-            - echo "Installing Docker and required dependencies"
+
+            # Install necessary dependencies
+            - echo "Installing dependencies"
             - sudo apt-get update
-            - sudo apt-get install -y docker.io x11vnc imagemagick
+            - sudo apt-get install -y curl wget unzip xvfb libgtk-3-0 libgbm1 libx11-6 libxcomposite1 libxdamage1 libxrandr2 libasound2 libvulkan1
 
-            # Build Docker image for Anbox (assuming a Dockerfile exists)
-            - echo "Building Docker image"
+            # Download and Install Blisk (version will vary)
+            - echo "Installing Blisk Browser"
+            - curl -sSL https://blisk.io/download/latest -o blisk.deb
+            - sudo dpkg -i blisk.deb || sudo apt-get install -f -y
+
+            # Install Node.js and NPM for Selenium or Puppeteer automation
+            - echo "Installing Node.js and Puppeteer for automation"
+            - sudo apt-get install -y nodejs npm
+            - sudo npm install puppeteer
+
+            # Run Xvfb (virtual display) to simulate a screen for Blisk
+            - echo "Starting Xvfb for headless display"
+            - Xvfb :99 -screen 0 1280x1024x24 & export DISPLAY=:99
+
+            # Run Puppeteer to automate Gmail account creation in Blisk
+            - echo "Automating Gmail account creation"
             - |
-              docker build -t anbox-container .
+              cat <<EOF > create_gmail.js
+              const puppeteer = require('puppeteer');
+              async function createAccount() {
+                  const browser = await puppeteer.launch({headless: false, executablePath: '/usr/bin/blisk'});
+                  const page = await browser.newPage();
 
-            # Run Docker container with Anbox
-            - echo "Running Anbox container"
-            - |
-              docker run -d --name anbox --privileged \
-                --volume /dev:/dev \
-                --device /dev/ashmem --device /dev/binder --device /dev/graphics/fb0 \
-                anbox-container
+                  // Go to Gmail account creation page
+                  await page.goto('https://accounts.google.com/signup');
+                  await page.waitForSelector('input[name="firstName"]');
 
-            # Verify that the Anbox container is running
-            - echo "Verifying Anbox container is running"
-            - docker ps
+                  // Fill the form with random details (you can modify this)
+                  await page.type('input[name="firstName"]', 'John');
+                  await page.type('input[name="lastName"]', 'Doe');
+                  await page.type('input[name="Username"]', 'john.doe' + Math.floor(Math.random() * 10000));
+                  await page.type('input[name="Passwd"]', 'Password123!');
+                  await page.type('input[name="ConfirmPasswd"]', 'Password123!');
+                  await page.click('#accountDetailsNext');
 
-            # Install Anbox and dependencies inside the container
-            - echo "Installing Anbox and dependencies in container"
-            - docker exec -u root anbox-container bash -c "apt-get update && apt-get install -y anbox x11vnc imagemagick"
+                  // Wait for the next page (could add more steps for phone verification, etc.)
+                  await page.waitForNavigation();
 
-            # Start Anbox session
-            - echo "Starting Anbox session"
-            - docker exec anbox-container bash -c "anbox session-manager &"
+                  // Screenshot of the completed page
+                  await page.screenshot({ path: '/tmp/gmail_account_creation.png' });
 
-            # Wait for Anbox to load
-            - echo "Waiting for Anbox to load"
-            - sleep 20  # Adjust depending on Anbox loading time
+                  await browser.close();
+              }
 
-            # Start X11VNC server to capture the screen
-            - echo "Starting X11VNC server"
-            - docker exec anbox-container bash -c "x11vnc -display :0 -forever -nopw -listen localhost &"
+              createAccount();
+              EOF
 
-            # Capture screenshot using ImageMagick (import command)
-            - echo "Capturing screenshot"
-            - docker exec anbox-container bash -c "import -window root /tmp/screenshot.png"
+            # Run the Puppeteer script
+            - node create_gmail.js
 
-            # Copy the screenshot from the container to the host
-            - docker cp anbox-container:/tmp/screenshot.png ./screenshot.png
+            # Push the screenshot artifact
+            - artifact push job /tmp/gmail_account_creation.png
 
-            # Move screenshot to the /tmp directory
-            - echo "Moving screenshot to /tmp directory"
-            - mv ./screenshot.png /tmp/screenshot.png
-
-            # Push the screenshot artifact as per the pattern
-            - artifact push job /tmp/screenshot.png
+            # Cleanup
+            - rm create_gmail.js
