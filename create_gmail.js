@@ -18,7 +18,7 @@ async function captureScreenshot() {
         await page.goto('https://accounts.google.com/signup');
         
         // Wait for 4 seconds to ensure the page has fully loaded
-        await delay(4000);  // Use the custom delay function
+        //await delay(4000);  // Use the custom delay function
 
         // Take a screenshot
         await page.screenshot({ path: '/tmp/gmail_account_creation.png' });
