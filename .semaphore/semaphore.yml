@@ -24,29 +24,30 @@ blocks:
             - echo "Installing Puppeteer"
             - PUPPETEER_SKIP_DOWNLOAD=true npm install puppeteer
             - echo "Creating Gmail account creation script"
-            # Save the JavaScript to a file
+            # Use 'cat' to create the JavaScript file
             - |
-              echo 'const puppeteer = require("puppeteer");' > create_gmail.js
-              echo 'async function createAccount() {' >> create_gmail.js
-              echo '  const browser = await puppeteer.launch({' >> create_gmail.js
-              echo '    headless: false,' >> create_gmail.js
-              echo '    executablePath: "/usr/bin/firefox"' >> create_gmail.js
-              echo '  });' >> create_gmail.js
-              echo '  const page = await browser.newPage();' >> create_gmail.js
-              echo '  await page.goto("https://accounts.google.com/signup");' >> create_gmail.js
-              echo '  await page.waitForSelector("input[name=\'firstName\']");' >> create_gmail.js
-              echo '  await page.type("input[name=\'firstName\']", "John");' >> create_gmail.js
-              echo '  await page.type("input[name=\'lastName\']", "Doe");' >> create_gmail.js
-              echo '  await page.type("input[name=\'Username\']", "john.doe" + Math.floor(Math.random() * 10000));' >> create_gmail.js
-              echo '  await page.type("input[name=\'Passwd\']", "Password123!");' >> create_gmail.js
-              echo '  await page.type("input[name=\'ConfirmPasswd\']", "Password123!");' >> create_gmail.js
-              echo '  await page.click("#accountDetailsNext");' >> create_gmail.js
-              echo '  await page.waitForNavigation();' >> create_gmail.js
-              echo '  await page.screenshot({ path: "/tmp/gmail_account_creation.png" });' >> create_gmail.js
-              echo '  await browser.close();' >> create_gmail.js
-              echo '}' >> create_gmail.js
-              echo '' >> create_gmail.js
-              echo 'createAccount();' >> create_gmail.js
+              cat <<EOF > create_gmail.js
+              const puppeteer = require("puppeteer");
+              async function createAccount() {
+                const browser = await puppeteer.launch({
+                  headless: false,
+                  executablePath: "/usr/bin/firefox"
+                });
+                const page = await browser.newPage();
+                await page.goto("https://accounts.google.com/signup");
+                await page.waitForSelector("input[name='firstName']");
+                await page.type("input[name='firstName']", "John");
+                await page.type("input[name='lastName']", "Doe");
+                await page.type("input[name='Username']", "john.doe" + Math.floor(Math.random() * 10000));
+                await page.type("input[name='Passwd']", "Password123!");
+                await page.type("input[name='ConfirmPasswd']", "Password123!");
+                await page.click("#accountDetailsNext");
+                await page.waitForNavigation();
+                await page.screenshot({ path: "/tmp/gmail_account_creation.png" });
+                await browser.close();
+              }
+              createAccount();
+              EOF
             - echo "Running Gmail account creation script"
             - node create_gmail.js
             - echo "Screenshot saved as /tmp/gmail_account_creation.png"
